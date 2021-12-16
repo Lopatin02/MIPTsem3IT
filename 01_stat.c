@@ -27,13 +27,13 @@ const char* device_type(const mode_t mode) {
 
 int main(int argc, char* argv[]) {
     if(argc != 2) {
-        fprintf(stderr, "Incorrect argc: %d\n", argc);
+        fprintf(stderr, "Usage: %s <pathname>\n", argv[0]);
         exit(EXIT_FAILURE);
     }
 
     struct stat sb;
 
-    if(lstat(argv[1], &sb) == -1) { // почему тут именно lstat?
+    if(lstat(argv[1], &sb) == -1) { //lstat = lstat , но однако lstat - о ссылке, stat - про файл
         perror("lstat");
         exit(EXIT_FAILURE);
     }
