@@ -1,5 +1,4 @@
 //2.1, не заворачивая в цикл (open, dprintf %s)
-
 #include <sys/types.h> 
 #include <sys/stat.h>
 #include <fcntl.h> 
@@ -30,7 +29,7 @@ int main(int argc, char * argv[])
 		return 2;
 	}
 
-	if (dprintf(fd,"%s", argv[2]) < 0)
+	if (dprintf(fd,"%s", argv[2]) < 0)//dprintf пишет все, что ему передали, тогда как write лишь часть информации. Поэтому в прошлой задаче мы делали цикл, чтобы передать все
 	{
 		perror("Failure during writing"); 
 		close(fd); 
