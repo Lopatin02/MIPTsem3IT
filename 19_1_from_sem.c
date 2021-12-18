@@ -7,24 +7,26 @@
 #include <time.h>
 #include <pthread.h>
 
-//Для организации взаимоисключения на критических участках используем семафор mutex
+//Блокировки взаимного исключения (мьютексы) не позволяют нескольким потокам одновременно выполнять критические разделы кода, 
+//которые обращаются к совместно используемым данным (то есть мьютексы используются для сериализации выполнения потоков).
 
 typedef struct 
 {
-	pthread_mutex_t mutex;
+	pthread_mutex_t mutex; //создаем мьютекс
 	unsigned long long counter;
 	int iterations;
 } 
+
 work_area_t;
 
 void * thr_body(void * arg) 
 {
 	work_area_t * w = arg;
-	for (int i = 0; i < w->iterations; i++) 
+	for (int i = 0; i < w -> iterations; i++) 
 	{
-		pthread_mutex_lock(&w->mutex); //Объект, на который ссылается mutex блокируется
-		w->counter++;
-		pthread_mutex_unlock(&w->mutex);
+		pthread_mutex_lock(&w -> mutex); //Объект мьютекса, на который ссылается мьютекс, должен быть заблокирован путем вызова pthread_mutex_lock ()
+		w -> counter++;
+		pthread_mutex_unlock(&w -> mutex);
 	}
 
 	puts("Done (secondary)");
@@ -33,30 +35,31 @@ void * thr_body(void * arg)
 
 int main(int argc, char * argv[]) 
 {
-	
-	//PTHREAD_MUTEX_INITIALIZER - создание mutex'a с "базовыми настройками"
-	work_area_t data = 
+	work_area_t data =
 	{
-		.mutex = PTHREAD_MUTEX_INITIALIZER,
+		.mutex = PTHREAD_MUTEX_INITIALIZER,//PTHREAD_MUTEX_INITIALIZER инициализирует мьютекс, установив его значение по умолчанию(то есть настройки - базовые)
 		.counter = 0,
-		.iterations = (argc > 1) ? atoi(argv[1]) : 1000,
+		.iterations = (argc > 1) ? atoi(argv[1]) : 1000,//конвертирует начальную часть строки, на которую указывает nptr, в целое число 
 	};
 
 	pthread_t secondary_thread_id; //возвращает положительное значение, если ошибка
-	if (errno = pthread_create(&secondary_thread_id, NULL, thr_body, &data)) 
+	if (errno = pthread_create(&secondary_thread_id, NULL, thr_body, &data))//Функция pthread_create () используется для создания нового потока с атрибутами, указанными attr , внутри процесса. 
+        //Если attr - ПУСТО ( NULL), используются атрибуты по умолчанию 
+	//Функция pthread_create () запускает новый поток в вызывающем процессе. Новая ветка
+        //запускает выполнение, вызывая thr_body; data передается как единственный аргумент thr_body
 	{
-		perror("pthread_create");
+		perror("pthread_create");//если ошибка при создании
 		return 1;
 	}
 
 	for (int i = 0; i < 10; i++) 
 	{
-		pthread_mutex_lock(&data.mutex);
+		pthread_mutex_lock(&data.mutex);//блокируем на то, что ссылается data.mutex
 		data.counter++;
-		pthread_mutex_unlock(&data.mutex);
+		pthread_mutex_unlock(&data.mutex);////Объект мьютекса, на который ссылается мьютекс, должен быть разблокирован
 	}
 	puts("Done (main)");
-	//нить исполнения, вызвавшая эту функцию переходит в состояние ожидания до завершения thread'a
+	//нить исполнения, которая вызвала эту функцию переходит в состояние ожидания до завершения thread
 	pthread_join(secondary_thread_id, NULL);
 
 	return 0;
