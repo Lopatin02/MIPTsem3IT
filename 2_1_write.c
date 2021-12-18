@@ -19,7 +19,7 @@ ssize_t write_all(int fd, const void *buf, size_t count) //функция, ко�
 		ssize_t res = write(fd, buf_adder + bytes_written, count - bytes_written); 
 		if(res < 0) 
 			return res; 
-		bytes_written += res; 
+		bytes_written += (size_t)res; 
 			
 	}
 	return (ssize_t)bytes_written; 
@@ -27,6 +27,8 @@ ssize_t write_all(int fd, const void *buf, size_t count) //функция, ко�
 
 int main(int argc, char * argv[]) 
 {
+	int res = 0;
+
 	//Выход с ошибкой, если неправильный ввод данных
 	if (argc != 3) 
 	{
@@ -48,16 +50,15 @@ int main(int argc, char * argv[])
 	if (write_all(fd, argv[2], strlen(argv[2])) < 0)
 	{
 		perror("Failure during writing"); 
-		close(fd); 
-		return 3;
+		res = 3;
 	}
 
 	//Выход с ошибкой, если файл не закрылся
-	if (close(fd) < 0) 
-	{
-		perror("Failure during close"); 
-		return 4; 
+	if (close(fd) < 0)
+	{ 
+		perror("Failure during close");
+		res = 4; 
 	}
 
-	return 0; 
+	return res;
 }
