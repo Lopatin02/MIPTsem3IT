@@ -10,6 +10,8 @@
 
 int main(int argc, char * argv[]) 
 {
+	int res = 0;
+
 	//Выход с ошибкой, если неправильный ввод
 	if (argc != 3) 
 	{
@@ -32,8 +34,7 @@ int main(int argc, char * argv[])
 	if (dprintf(fd,"%s", argv[2]) < 0)//dprintf пишет все, что ему передали, тогда как write лишь часть информации. Поэтому в прошлой задаче мы делали цикл, чтобы передать все
 	{
 		perror("Failure during writing"); 
-		close(fd); 
-		return 3;
+		res = 3;
 	}
 
 	
@@ -41,8 +42,8 @@ int main(int argc, char * argv[])
 	if (close(fd) < 0) 
 	{
 		perror("Failure during close"); 
-		return 4; 
+		res = 4; 
 	}
 
-	return 0; 
+	return res; 
 }
