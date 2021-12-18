@@ -18,7 +18,7 @@ ssize_t write_all(int fd, const void *buf, size_t count) {//создаем эт�
         if(res < 0) {
             return res;
         }
-        bytes_written += res;
+        bytes_written += (size_t)res;
     }
 
     return (ssize_t)bytes_written;
@@ -28,48 +28,43 @@ ssize_t write_all(int fd, const void *buf, size_t count) {//создаем эт�
 int copy_file(int src_fd, int dest_fd) {//src_fd - откуда копируем, dest_fd - куда копировать
     ssize_t bytes = 0;
     char* data = (char*)malloc(BUF_SIZE);//data - выдел память(читаем блоками)
-    if(!data) {//malloc не ошибся
-        close(src_fd);
-        close(dest_fd);
-	
+    if(!data) {//malloc не ошибся	
 	perror("Failed memory allocation");
         return 6;
     }
+    
+    int res = 0;
 
     while(1) {
         bytes = read(src_fd, data, sizeof(data));
 
-        if(bytes == -1) {//проверка, что read не ошибся
-            free(data);
-            close(src_fd);
-            close(dest_fd);
-	                
+        if(bytes == -1) {//проверка, что read не ошибся	                
 	    perror("File reading error");
-            return 7;
+            res = 7;
+	    break;
         }
 
         if(bytes == 0) {// выход из цикла
             break;
         }
 
-        bytes = write_all(dest_fd, data, bytes);//записываем в write_all, bytes(число байтов), data - указатель на начало блока, в который считали
+        bytes = write_all(dest_fd, data, (size_t)bytes);//записываем в write_all, bytes(число байтов), data - указатель на начало блока, в который считали
 
         if(bytes < 0) {//если write ошибся
-            free(data);
-            close(src_fd);
-            close(dest_fd);
-
             perror("File writing error");  
-            return 8;
+            res = 8;
+	    break;
         }
     }
 
     free(data);
-    return 0;
+    return res;
 }
 
 
 int main(int argc, char* argv[]) {
+    int res = 0;
+
     if(argc != 3) {//проверка, что передали верное кол-во аргументов
         fprintf(stderr, "Usage: %s path text\n", argv[0]);
         return 1;
@@ -89,15 +84,15 @@ int main(int argc, char* argv[]) {
     }
     if(copy_file(in_fd, out_fd) != 0) {
         fprintf(stderr, "Failed to copy to %s from %s", argv[1], argv[2]);
-        return 4;
+        res = 4;
     }
     if (close(in_fd)) {
         perror("File close error");
-        return 5;
+        res = 5;
     }
     if (close(out_fd)) {
         perror("File close error");
-        return 6;
+        res = 6;
     }
-    return 0;
+    return res;
 }
