@@ -23,7 +23,8 @@ int main(void) {
         proc_info("child");//выводим информацию о процессе
         return 0;
     }
-    //this code is executed in parent process only
+    
+    //выполняется лишь для процесса родителя
     proc_info("parent");
     wait(NULL);
 
