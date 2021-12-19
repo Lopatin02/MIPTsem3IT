@@ -55,7 +55,7 @@ int main(int argc, char const *argv[])
         return 2;
     }
 
-    while(1)//тут мы открываем каждый файл из директории 
+    while(1)//тут перечисляем каждый файл из директории 
     {
 	errno = 0;
 	struct dirent *entry = readdir(dir_fd);
@@ -68,7 +68,7 @@ int main(int argc, char const *argv[])
 	    return 3;
 	}
 
-	char entry_type = dirent_type(entry->d_type);//определяем тип директории, структура задана указателем, поэтому и ставится ->, если была бы переменная, то было бы entry.d_type
+	char entry_type = dirent_type(entry->d_type);//определяем тип файла, структура задана указателем, поэтому и ставится ->, если была бы переменная, то было бы entry.d_type
 	
 	if (entry_type == '?')//entry_type не подробный, поэтому lstat вызываем, чтобы получить более подробную информацию 
 	{
