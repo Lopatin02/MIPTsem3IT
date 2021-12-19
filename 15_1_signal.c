@@ -25,10 +25,15 @@ int main(void)
     
     for(int i = 0; i < NSIG; i++) 
     {
+        //signal(i, sig_handler);
 	struct sigaction s_act;//Системный вызов sigaction используется для изменения действий процесса при получении соответствующего сигнала.
         memset(&s_act, 0, sizeof(s_act));
+        sigfillset(&s_act.sa_mask);
+        s_act.sa_flags = SA_RESTART;
         s_act.sa_handler = sig_handler;
-        sigaction(i, &s_act, NULL);
+        if (sigaction(i, &s_act, NULL)){
+           perror("sigaction");
+        }
     }
 
     while(1) 
